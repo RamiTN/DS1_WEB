@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Admin Dashboard - ChallengeHub</title>
+    <link rel="icon" type="image/png" href="/images/ico.png">
 </head>
 <body>
 <h2>Admin Dashboard</h2>

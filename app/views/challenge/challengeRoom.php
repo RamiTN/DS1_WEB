@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Challenges - ChallengeHub</title>
+    <link rel="icon" type="image/png" href="/images/ico.png">
 </head>
 <body>
 <h2>All Challenges</h2>

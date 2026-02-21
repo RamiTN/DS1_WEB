@@ -2,6 +2,8 @@
 <html>
 <head>
     <title>Submit Entry - ChallengeHub</title>
+        <link rel="icon" type="image/png" href="public/images/ico.png">
+
 </head>
 <body>
 <h2>Submit to Challenge</h2>

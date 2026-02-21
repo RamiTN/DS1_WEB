@@ -2,6 +2,8 @@
 <html>
 <head>
     <title>Welcome to your Dashboard - ChallengeHub</title>
+        <link rel="icon" type="image/png" href="public/images/ico.png">
+
 </head>
 <body>
 <h2>Profile</h2>
