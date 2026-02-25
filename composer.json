@@ -1,0 +1,6 @@
+{
+    "name": "msi/ds1_web",
+    "require": {
+        "twbs/bootstrap": "5.0.2"
+    }
+}
