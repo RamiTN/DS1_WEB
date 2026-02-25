@@ -6,72 +6,96 @@ class SubmissionController {
 
     public function __construct() {
         $this->submissionModel = new Submission();
+
         if(session_status() === PHP_SESSION_NONE) session_start();
 
-        // Redirect if user is not logged in
         if(!isset($_SESSION['user'])) {
             header('Location: index.php?controller=User&action=login');
             exit;
         }
     }
 
-    // Create a submission for a challenge
-    public function create() {
-        if(isset($_GET['challenge_id'])) {
-            $challenge_id = intval($_GET['challenge_id']); // sanitize input
-        } else {
-            // No challenge ID provided, redirect
-            header('Location: index.php?controller=Challenge&action=index');
+    // Create a submission
+public function create() {
+
+    // If form submitted
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+        if (!isset($_POST['challenge_id'])) {
+            header("Location: index.php?controller=Challenge&action=challengeRoom");
             exit;
         }
 
+        $challenge_id = intval($_POST['challenge_id']);
+        $description = trim($_POST['description'] ?? '');
+        $image_or_link = trim($_POST['image_or_link'] ?? '');
+
+        // Basic validation
+        if (empty($description)) {
+            header("Location: index.php?controller=Submission&action=create&challenge_id=" . $challenge_id);
+            exit;
+        }
+
+        $this->submissionModel->create(
+            $challenge_id,
+            $_SESSION['user']['id'],
+            $description,
+            $image_or_link
+        );
+
+        header("Location: index.php?controller=Challenge&action=challengeRoom");
+        exit;
+    }
+
+    // If page accessed normally (GET)
+    if (!isset($_GET['challenge_id'])) {
+        header("Location: index.php?controller=Challenge&action=challengeRoom");
+        exit;
+    }
+
+    $challenge_id = intval($_GET['challenge_id']);
+
+    require __DIR__ . '/../views/submission/create.php';
+}
+
+    // Edit submission
+    public function edit() {
+
+        if(!isset($_GET['id'])) {
+            header('Location: index.php?controller=Challenge&action=challengeRoom');
+            exit;
+        }
+
+        $id = intval($_GET['id']);
+        $submission = $this->submissionModel->getById($id);
+
         if($_SERVER['REQUEST_METHOD'] === 'POST') {
+
             $description = $_POST['description'] ?? '';
             $image_or_link = $_POST['image_or_link'] ?? null;
 
-            $this->submissionModel->create(
-                $challenge_id,
-                $_SESSION['user']['id'],
+            $this->submissionModel->update(
+                $id,
                 $description,
                 $image_or_link
             );
 
-            header("Location: index.php?controller=Challenge&action=index");
-            exit;
-        } else {
-            require __DIR__ . '/../views/submission/create.php';
-        }
-    }
-
-    // Edit a submission
-    public function edit() {
-        if(!isset($_GET['id'])) {
-            header('Location: index.php?controller=Challenge&action=index');
-            exit;
-        }
-
-        $id = intval($_GET['id']); // sanitize input
-        $submission = $this->submissionModel->getById($id);
-
-        if($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $description = $_POST['description'] ?? '';
-            $image_or_link = $_POST['image_or_link'] ?? null;
-            $this->submissionModel->update($id, $description, $image_or_link);
-
-            header('Location: index.php?controller=Challenge&action=index');
+            header('Location: index.php?controller=Challenge&action=challengeRoom');
             exit;
         }
 
         require __DIR__ . '/../views/submission/edit.php';
     }
 
-    // Delete a submission
+    // Delete submission
     public function delete() {
+
         if(isset($_GET['id'])) {
-            $id = intval($_GET['id']); // sanitize input
+            $id = intval($_GET['id']);
             $this->submissionModel->delete($id);
         }
-        header('Location: index.php?controller=Challenge&action=index');
+
+        header('Location: index.php?controller=Challenge&action=challengeRoom');
         exit;
     }
 }

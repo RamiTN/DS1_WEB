@@ -10,13 +10,22 @@ class Challenge {
         $this->conn = $db->connect();
     }
 
-    public function create($user_id, $title, $description, $category, $deadline, $image = null) {
-        $stmt = $this->conn->prepare(
-            "INSERT INTO {$this->table} (user_id,title,description,category,deadline,image) 
-             VALUES (?,?,?,?,?,?,NOW())"
-        );
-        return $stmt->execute([$user_id, $title, $description, $category, $deadline, $image]);
-    }
+ public function create($user_id, $title, $description, $category, $deadline, $image = null) {
+    $stmt = $this->conn->prepare(
+        "INSERT INTO {$this->table} 
+        (user_id, title, description, category, deadline, image) 
+        VALUES (?, ?, ?, ?, ?, ?)"
+    );
+
+    return $stmt->execute([
+        $user_id,
+        $title,
+        $description,
+        $category,
+        $deadline,
+        $image
+    ]);
+}
 
     public function getAll() {
         $stmt = $this->conn->query("SELECT * FROM {$this->table}");

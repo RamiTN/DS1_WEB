@@ -13,16 +13,21 @@ class Submission {
     public function create($challenge_id, $user_id, $description, $image_or_link = null) {
         $stmt = $this->conn->prepare(
             "INSERT INTO {$this->table} (challenge_id,user_id,description,image_or_link)
-             VALUES (?,?,?,?,NOW())"
+             VALUES (?,?,?,?)"
         );
         return $stmt->execute([$challenge_id, $user_id, $description, $image_or_link]);
     }
 
-    public function getAllByChallenge($challenge_id) {
-        $stmt = $this->conn->prepare("SELECT * FROM {$this->table} WHERE challenge_id=?");
-        $stmt->execute([$challenge_id]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+public function getAllByChallenge($challenge_id) {
+    $stmt = $this->conn->prepare("
+        SELECT s.*, u.name AS user_name
+        FROM {$this->table} s
+        JOIN users u ON s.user_id = u.id
+        WHERE s.challenge_id=?
+    ");
+    $stmt->execute([$challenge_id]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
     public function getById($id) {
         $stmt = $this->conn->prepare("SELECT * FROM {$this->table} WHERE id=?");
