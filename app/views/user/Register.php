@@ -46,26 +46,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        const form = document.getElementById('registerForm');
-        const password = document.getElementById('password');
-        const confirmPassword = document.getElementById('confirm_password');
-        const passwordError = document.getElementById('passwordError');
-
-        form.addEventListener('submit', function (event) {
-            if (password.value !== confirmPassword.value) {
-                event.preventDefault();
-                passwordError.classList.remove('d-none');
-                confirmPassword.classList.add('is-invalid');
-            }
-        });
-
-        confirmPassword.addEventListener('input', function () {
-            if (password.value === confirmPassword.value) {
-                passwordError.classList.add('d-none');
-                confirmPassword.classList.remove('is-invalid');
-            }
-        });
-    </script>
+    <script src="public/js/register.js"></script>
 </body>
 </html>
