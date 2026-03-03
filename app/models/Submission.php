@@ -44,4 +44,11 @@ public function getAllByChallenge($challenge_id) {
         $stmt = $this->conn->prepare("DELETE FROM {$this->table} WHERE id=?");
         return $stmt->execute([$id]);
     }
+
+public function getAll() {
+    $stmt = $this->conn->prepare("SELECT * FROM submissions");
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 }

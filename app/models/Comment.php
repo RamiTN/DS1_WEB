@@ -27,4 +27,10 @@ class Comment {
         $stmt = $this->conn->prepare("DELETE FROM {$this->table} WHERE id=?");
         return $stmt->execute([$id]);
     }
+public function getAll() {
+    $stmt = $this->conn->prepare("SELECT * FROM comments");
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 }

@@ -67,4 +67,21 @@ class Vote {
         $stmt->execute([$user_id]);
         return $stmt->fetch() !== false;
     }
+
+public function countAllVotes() {
+    $stmt = $this->conn->prepare("SELECT COUNT(*) FROM votes");
+    $stmt->execute();
+    return (int)$stmt->fetchColumn();
+}
+
+public function countBySubmission($submissionId) {
+    $stmt = $this->conn->prepare("
+        SELECT COUNT(*) 
+        FROM votes 
+        WHERE id = ?
+    ");
+    $stmt->execute([$submissionId]);
+    return (int)$stmt->fetchColumn();
+}
+
 }
