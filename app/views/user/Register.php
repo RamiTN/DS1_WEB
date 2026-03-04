@@ -19,6 +19,7 @@
             <?php endif; ?>
 
             <form method="POST" id="registerForm">
+                <?= csrf_field() ?>
                 <div class="mb-3">
                     <label for="name" class="form-label fw-medium small">Name :</label>
                     <input type="text" id="name" name="name" class="form-control" placeholder="Enter your name" required>

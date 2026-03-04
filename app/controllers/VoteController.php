@@ -20,19 +20,16 @@ class VoteController {
         }
     }
 
-    // ✅ Vote on a challenge
-public function vote() {
-
-    if (isset($_POST['challenge_id'])) {
-
-        $challenge_id = intval($_POST['challenge_id']);
-        $user_id = $_SESSION['user']['id'];
-        $this->voteModel->vote($challenge_id, $user_id);
+    // Vote on a submission (one vote per user per submission)
+    public function vote() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submission_id'])) {
+            $submission_id = intval($_POST['submission_id']);
+            $user_id = $_SESSION['user']['id'];
+            $this->voteModel->vote($submission_id, $user_id);
+        }
+        header('Location: index.php?controller=Challenge&action=challengeRoom');
+        exit;
     }
-
-    header('Location: index.php?controller=Challenge&action=challengeRoom');
-    exit;
-}
 
     
 }

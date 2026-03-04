@@ -17,36 +17,38 @@ class CommentController {
 
     // Create a comment
     public function create() {
-        if(isset($_GET['submission_id'])) {
-            $submission_id = intval($_GET['submission_id']); // sanitize input
-        } else {
-            header('Location: index.php?controller=Challenge&action=index');
+        $submission_id = isset($_GET['submission_id']) ? intval($_GET['submission_id']) : (isset($_POST['submission_id']) ? intval($_POST['submission_id']) : 0);
+        if (!$submission_id) {
+            header('Location: index.php?controller=Challenge&action=challengeRoom');
             exit;
         }
 
         if($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $content = $_POST['content'] ?? '';
-            $this->commentModel->create(
-                $submission_id,
-                $_SESSION['user']['id'],
-                $content
-            );
-
-            header("Location: index.php?controller=Challenge&action=index");
+            $content = trim($_POST['content'] ?? '');
+            if ($content !== '') {
+                $this->commentModel->create($submission_id, $_SESSION['user']['id'], $content);
+            }
+            header('Location: index.php?controller=Challenge&action=challengeRoom');
             exit;
         }
-
-        // If needed, you could include a small comment form view here
-        // require __DIR__ . '/../views/comment/create.php';
+        header('Location: index.php?controller=Challenge&action=challengeRoom');
+        exit;
     }
 
-    // Delete a comment
+    // Delete a comment (author or admin only)
     public function delete() {
         if(isset($_GET['id'])) {
-            $id = intval($_GET['id']); // sanitize input
-            $this->commentModel->delete($id);
+            $id = intval($_GET['id']);
+            $comment = $this->commentModel->getById($id);
+            if ($comment) {
+                $isAuthor = (int)$comment['user_id'] === (int)($_SESSION['user']['id'] ?? 0);
+                $isAdmin = ($_SESSION['user']['role'] ?? '') === 'admin';
+                if ($isAuthor || $isAdmin) {
+                    $this->commentModel->delete($id);
+                }
+            }
         }
-        header('Location: index.php?controller=Challenge&action=index');
+        header('Location: index.php?controller=Challenge&action=challengeRoom');
         exit;
     }
 }

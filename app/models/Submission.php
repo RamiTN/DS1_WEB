@@ -20,10 +20,12 @@ class Submission {
 
 public function getAllByChallenge($challenge_id) {
     $stmt = $this->conn->prepare("
-        SELECT s.*, u.name AS user_name
+        SELECT s.*, u.name AS user_name,
+            (SELECT COUNT(*) FROM votes v WHERE v.submission_id = s.id) AS votes_count
         FROM {$this->table} s
         JOIN users u ON s.user_id = u.id
-        WHERE s.challenge_id=?
+        WHERE s.challenge_id = ?
+        ORDER BY votes_count DESC, s.id DESC
     ");
     $stmt->execute([$challenge_id]);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);

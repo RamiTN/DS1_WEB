@@ -26,13 +26,16 @@ public function create() {
             exit;
         }
 
+        if (!csrf_verify()) {
+            header("Location: index.php?controller=Challenge&action=challengeRoom");
+            exit;
+        }
         $challenge_id = intval($_POST['challenge_id']);
         $description = trim($_POST['description'] ?? '');
         $image_or_link = trim($_POST['image_or_link'] ?? '');
 
-        // Basic validation
         if (empty($description)) {
-            header("Location: index.php?controller=Submission&action=create&challenge_id=" . $challenge_id);
+            header("Location: index.php?controller=Challenge&action=challengeRoom");
             exit;
         }
 
@@ -58,43 +61,43 @@ public function create() {
     require __DIR__ . '/../views/submission/create.php';
 }
 
-    // Edit submission
+    // Edit submission (owner only)
     public function edit() {
-
         if(!isset($_GET['id'])) {
             header('Location: index.php?controller=Challenge&action=challengeRoom');
             exit;
         }
-
         $id = intval($_GET['id']);
         $submission = $this->submissionModel->getById($id);
-
-        if($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-            $description = $_POST['description'] ?? '';
-            $image_or_link = $_POST['image_or_link'] ?? null;
-
-            $this->submissionModel->update(
-                $id,
-                $description,
-                $image_or_link
-            );
-
+        if (!$submission || (int)$submission['user_id'] !== (int)$_SESSION['user']['id']) {
             header('Location: index.php?controller=Challenge&action=challengeRoom');
             exit;
         }
-
+        if($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!csrf_verify()) {
+                require __DIR__ . '/../views/submission/edit.php';
+                return;
+            }
+            $description = trim($_POST['description'] ?? '');
+            $image_or_link = trim($_POST['image_or_link'] ?? '') ?: null;
+            if ($description !== '') {
+                $this->submissionModel->update($id, $description, $image_or_link);
+            }
+            header('Location: index.php?controller=Challenge&action=challengeRoom');
+            exit;
+        }
         require __DIR__ . '/../views/submission/edit.php';
     }
 
-    // Delete submission
+    // Delete submission (owner only)
     public function delete() {
-
         if(isset($_GET['id'])) {
             $id = intval($_GET['id']);
-            $this->submissionModel->delete($id);
+            $submission = $this->submissionModel->getById($id);
+            if ($submission && (int)$submission['user_id'] === (int)$_SESSION['user']['id']) {
+                $this->submissionModel->delete($id);
+            }
         }
-
         header('Location: index.php?controller=Challenge&action=challengeRoom');
         exit;
     }

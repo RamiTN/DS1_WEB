@@ -2,16 +2,19 @@
 require_once __DIR__ . '/../models/Challenge.php';
 require_once __DIR__ . '/../models/Submission.php';
 require_once __DIR__ . '/../models/Vote.php';
+require_once __DIR__ . '/../models/Comment.php';
 
 class ChallengeController {
     private $challengeModel;
     private $submissionModel;
     private $voteModel;
+    private $commentModel;
 
     public function __construct() {
         $this->challengeModel = new Challenge();
         $this->submissionModel = new Submission();
         $this->voteModel = new Vote();
+        $this->commentModel = new Comment();
 
         if(session_status() === PHP_SESSION_NONE) session_start();
 
@@ -22,26 +25,24 @@ class ChallengeController {
         }
     }
 
-    // Show all challenges with submissions and votes
+    // Show all challenges with search, filter, sort; submissions with vote count and ranking
     public function challengeRoom() {
-        $challenges = $this->challengeModel->getAll();
+        $keyword = trim($_GET['search'] ?? '');
+        $category = trim($_GET['category'] ?? '');
+        $sort = $_GET['sort'] ?? 'newest';
+        if (!in_array($sort, ['newest', 'popularity', 'date'], true)) $sort = 'newest';
 
+        $challenges = $this->challengeModel->getFiltered($keyword, $category, $sort);
+        $categories = $this->challengeModel->getCategories();
+        $currentUserId = (int) $_SESSION['user']['id'];
+        $search = $keyword;
         foreach ($challenges as $key => $challenge) {
-
-            // Fetch only submissions for THIS challenge
             $submissions = $this->submissionModel->getAllByChallenge($challenge['id']);
-
-            // Attach submissions to the challenge
+            foreach ($submissions as $i => $sub) {
+                $submissions[$i]['has_voted'] = $this->voteModel->hasVotedSubmission($sub['id'], $currentUserId);
+                $submissions[$i]['comments'] = $this->commentModel->getAllBySubmission($sub['id']);
+            }
             $challenges[$key]['submissions'] = $submissions;
-
-            // Count votes for this challenge
-            $challenges[$key]['votes_count'] = $this->voteModel->countByChallenge($challenge['id']);
-
-            // Check if current user has voted → cast to boolean
-            $challenges[$key]['has_voted'] = (bool) $this->voteModel->hasVotedChallenge(
-                $challenge['id'],
-                $_SESSION['user']['id']
-            );
         }
 
         require __DIR__ . '/../views/challenge/challengeRoom.php';
@@ -50,61 +51,71 @@ class ChallengeController {
     // Create a new challenge
     public function create() {
         if($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $title = $_POST['title'] ?? '';
-            $description = $_POST['description'] ?? '';
-            $category = $_POST['category'] ?? '';
-            $deadline = $_POST['deadline'] ?? null;
-            $image = $_POST['image'] ?? null;
-
-            $this->challengeModel->create(
-                $_SESSION['user']['id'],
-                $title,
-                $description,
-                $category,
-                $deadline,
-                $image
-            );
-
+            if (!csrf_verify()) {
+                require __DIR__ . '/../views/challenge/create.php';
+                return;
+            }
+            $title = trim($_POST['title'] ?? '');
+            $description = trim($_POST['description'] ?? '');
+            $category = trim($_POST['category'] ?? '');
+            $deadline = $_POST['deadline'] ?: null;
+            $image = trim($_POST['image'] ?? '') ?: null;
+            if ($title !== '' && $description !== '' && $category !== '') {
+                $this->challengeModel->create(
+                    $_SESSION['user']['id'],
+                    $title,
+                    $description,
+                    $category,
+                    $deadline,
+                    $image
+                );
+            }
             header('Location: index.php?controller=Challenge&action=challengeRoom');
             exit;
         }
-
         require __DIR__ . '/../views/challenge/create.php';
     }
 
-    // Edit a challenge
+    // Edit a challenge (owner only)
     public function edit() {
         if(!isset($_GET['id'])) {
             header('Location: index.php?controller=Challenge&action=challengeRoom');
             exit;
         }
-
         $id = intval($_GET['id']);
         $challenge = $this->challengeModel->getById($id);
-
-        if($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $title = $_POST['title'] ?? '';
-            $description = $_POST['description'] ?? '';
-            $category = $_POST['category'] ?? '';
-            $deadline = $_POST['deadline'] ?? null;
-            $image = $_POST['image'] ?? null;
-
-            $this->challengeModel->update($id, $title, $description, $category, $deadline, $image);
-
+        if (!$challenge || (int)$challenge['user_id'] !== (int)$_SESSION['user']['id']) {
             header('Location: index.php?controller=Challenge&action=challengeRoom');
             exit;
         }
-
+        if($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!csrf_verify()) {
+                require __DIR__ . '/../views/challenge/edit.php';
+                return;
+            }
+            $title = trim($_POST['title'] ?? '');
+            $description = trim($_POST['description'] ?? '');
+            $category = trim($_POST['category'] ?? '');
+            $deadline = $_POST['deadline'] ?: null;
+            $image = trim($_POST['image'] ?? '') ?: null;
+            if ($title !== '' && $description !== '' && $category !== '') {
+                $this->challengeModel->update($id, $title, $description, $category, $deadline, $image);
+            }
+            header('Location: index.php?controller=Challenge&action=challengeRoom');
+            exit;
+        }
         require __DIR__ . '/../views/challenge/edit.php';
     }
 
-    // Delete a challenge
+    // Delete a challenge (owner only)
     public function delete() {
         if(isset($_GET['id'])) {
             $id = intval($_GET['id']);
-            $this->challengeModel->delete($id);
+            $challenge = $this->challengeModel->getById($id);
+            if ($challenge && (int)$challenge['user_id'] === (int)$_SESSION['user']['id']) {
+                $this->challengeModel->delete($id);
+            }
         }
-
         header('Location: index.php?controller=Challenge&action=challengeRoom');
         exit;
     }

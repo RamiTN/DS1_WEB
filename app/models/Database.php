@@ -1,18 +1,14 @@
 <?php
 class Database {
-    private $host = 'localhost';
-    private $db_name = 'challengehub';
-    private $username = 'root';
-    private $password = '';
     private $conn = null;
 
     public function connect() {
         if ($this->conn === null) {
             try {
                 $this->conn = new PDO(
-                    "mysql:host={$this->host};dbname={$this->db_name};charset=utf8",
-                    $this->username,
-                    $this->password
+                    "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8",
+                    DB_USER,
+                    DB_PASS
                 );
                 // Set PDO error mode to exception
                 $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

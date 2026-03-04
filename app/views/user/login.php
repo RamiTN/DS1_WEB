@@ -19,6 +19,7 @@
             <?php endif; ?>
 
             <form method="POST">
+                <?= csrf_field() ?>
                 <div class="mb-3">
                     <label for="email" class="form-label fw-medium small">Email</label>
                     <input type="email" id="email" name="email" class="form-control" placeholder="example@gmail.com" required>

@@ -1,0 +1,114 @@
+/* Admin Dashboard – small design */
+.admin-page {
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #f5f5f5;
+  min-height: 100vh;
+  padding: 1.25rem;
+  color: #333;
+}
+.admin-page .container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.admin-page h2 {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+.admin-page .toolbar {
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.admin-page .toolbar a {
+  color: #0d6efd;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+.admin-page .toolbar a:hover { text-decoration: underline; }
+.admin-page .toolbar .logout {
+  color: #dc3545;
+}
+
+/* Stats */
+.admin-page .stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.admin-page .stat-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  min-width: 100px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.admin-page .stat-card .value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0d6efd;
+}
+.admin-page .stat-card .label {
+  font-size: 0.75rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* Chart */
+.admin-page .chart-wrap {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.admin-page .chart-wrap h3 { margin: 0 0 0.75rem; font-size: 1rem; }
+
+/* Sections */
+.admin-page .section {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.admin-page .section h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* Tables */
+.admin-page table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.admin-page th,
+.admin-page td {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+.admin-page th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+}
+.admin-page tr:hover td { background: #f8f9fa; }
+.admin-page .table-wrap {
+  overflow-x: auto;
+}
+.admin-page td a {
+  color: #dc3545;
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+.admin-page td a:hover { text-decoration: underline; }
+.admin-page .desc-cell { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

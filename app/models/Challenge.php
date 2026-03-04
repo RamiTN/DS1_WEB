@@ -28,8 +28,51 @@ class Challenge {
 }
 
     public function getAll() {
-        $stmt = $this->conn->query("SELECT * FROM {$this->table}");
+        $stmt = $this->conn->query("SELECT * FROM {$this->table} ORDER BY id DESC");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Get challenges with optional search, category filter, and sort.
+     * @param string $keyword Search in title and description
+     * @param string $category Filter by category
+     * @param string $sort 'popularity' | 'date' | 'newest'
+     */
+    public function getFiltered($keyword = '', $category = '', $sort = 'newest') {
+        $sql = "SELECT c.*,
+            (SELECT COUNT(*) FROM votes v
+             INNER JOIN submissions s ON v.submission_id = s.id
+             WHERE s.challenge_id = c.id) AS total_votes
+            FROM {$this->table} c WHERE 1=1";
+        $params = [];
+        if ($keyword !== '') {
+            $sql .= " AND (c.title LIKE ? OR c.description LIKE ?)";
+            $p = '%' . $keyword . '%';
+            $params[] = $p;
+            $params[] = $p;
+        }
+        if ($category !== '') {
+            $sql .= " AND c.category = ?";
+            $params[] = $category;
+        }
+        switch ($sort) {
+            case 'popularity':
+                $sql .= " ORDER BY total_votes DESC, c.id DESC";
+                break;
+            case 'date':
+                $sql .= " ORDER BY c.deadline ASC, c.id DESC";
+                break;
+            default:
+                $sql .= " ORDER BY c.id DESC";
+        }
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getCategories() {
+        $stmt = $this->conn->query("SELECT DISTINCT category FROM {$this->table} ORDER BY category");
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
     public function getById($id) {

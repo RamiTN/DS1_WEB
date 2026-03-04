@@ -37,6 +37,20 @@ class User {
         return $stmt->execute([$name, $email, $id]);
     }
 
+    // Update password
+    public function updatePassword($id, $newPassword) {
+        $hash = password_hash($newPassword, PASSWORD_DEFAULT);
+        $stmt = $this->conn->prepare("UPDATE {$this->table} SET password=? WHERE id=?");
+        return $stmt->execute([$hash, $id]);
+    }
+
+    // Get user by ID
+    public function getById($id) {
+        $stmt = $this->conn->prepare("SELECT * FROM {$this->table} WHERE id=?");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     // Delete user
     public function delete($id) {
         $stmt = $this->conn->prepare("DELETE FROM {$this->table} WHERE id=?");
